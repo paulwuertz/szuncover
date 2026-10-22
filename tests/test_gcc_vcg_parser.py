@@ -1,6 +1,8 @@
 import unittest
-from .test_ctx import *
+
 from szuncover.gcc_vcg_parser import VCG_Edge, VCG_Graph, VCG_Label, VCG_Node, VCG_Parser
+
+from .test_ctx import *
 
 
 class Test_VCG_Parser(unittest.TestCase):

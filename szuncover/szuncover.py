@@ -4,11 +4,11 @@ import argparse
 import logging
 
 from calltree import (
-    get_vcg_graphs_from_build_dir,
-    get_all_edges_from_vcg_graphs,
-    map_vcg_nodes_to_call_entries,
-    map_vcg_call_edges_to_call_entries,
     ThreadStats,
+    get_all_edges_from_vcg_graphs,
+    get_vcg_graphs_from_build_dir,
+    map_vcg_call_edges_to_call_entries,
+    map_vcg_nodes_to_call_entries,
 )
 from config import load_config
 from report_output import print_stack_size_report

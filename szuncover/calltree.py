@@ -2,20 +2,18 @@ import fnmatch
 import os
 import sys
 
-from pydantic import BaseModel
-from pydantic.experimental.missing_sentinel import MISSING
-
 from gcc_vcg_parser import (
-    VCG_Graph,
-    VCG_Parser,
-    VCG_Label,
-    VCG_Node,
-    VCG_Edge,
-    VCG_Graph,
+    GCC_INDIRECT_CALL_LABEL,
     FunctionCalleeEntry,
     FunctionCallTree,
-    GCC_INDIRECT_CALL_LABEL,
+    VCG_Edge,
+    VCG_Graph,
+    VCG_Label,
+    VCG_Node,
+    VCG_Parser,
 )
+from pydantic import BaseModel
+from pydantic.experimental.missing_sentinel import MISSING
 
 NO_WORST_STACK_SIZE_YET = -1
 
