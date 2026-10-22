@@ -34,10 +34,7 @@ def print_stack_size_report(fn_callee_map, config):
     for thread_fn_name, stats in threadStats.items():
         total_calls_to_unresolved_all_calls = sum(stats.unresolved_calls.values())
         print(
-            "\t* %s: %d resulting in %d missing calls in the calltree",
-            thread_fn_name,
-            len(stats.unresolved_calls),
-            total_calls_to_unresolved_all_calls,
+            f"\t* {thread_fn_name}: {len(stats.unresolved_calls)} resulting in {total_calls_to_unresolved_all_calls} missing calls in the calltree"
         )
     print("* number of functions with missing stacksize in calltree:")
     for thread_fn_name, stats in threadStats.items():

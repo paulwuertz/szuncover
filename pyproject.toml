@@ -1,7 +1,7 @@
 [project]
 name = "szuncover"
 version = "0.1.0"
-description = "Uncover stack-usage for your threads"
+description = "Uncover stack-usages for your threads"
 long_description = """
 
 Stack size
