@@ -1,19 +1,14 @@
 import fnmatch
 import os
-import sys
 
 from gcc_vcg_parser import (
     GCC_INDIRECT_CALL_LABEL,
     FunctionCalleeEntry,
-    FunctionCallTree,
     VCG_Edge,
     VCG_Graph,
-    VCG_Label,
-    VCG_Node,
     VCG_Parser,
 )
 from pydantic import BaseModel
-from pydantic.experimental.missing_sentinel import MISSING
 
 NO_WORST_STACK_SIZE_YET = -1
 
@@ -35,9 +30,10 @@ def get_vcg_graphs_from_build_dir(build_dir: str) -> list[VCG_Graph]:
     call_files = find_files_with_extension("*.ci", build_dir)
 
     for ci_file in call_files:
-        ci_file_content = open(ci_file).read()
-        vcg_graph = VCG_Parser.parse_vcg_graph(ci_file_content)
-        vcg_graphs += [vcg_graph]
+        with open(ci_file) as file:
+            ci_file_content = file.read()
+            vcg_graph = VCG_Parser.parse_vcg_graph(ci_file_content)
+            vcg_graphs += [vcg_graph]
 
     return vcg_graphs
 
@@ -108,7 +104,7 @@ def deepest_call_tree(
 ) -> tuple[int, list[FunctionCalleeEntry]]:
     if f.worst_stack_use != NO_WORST_STACK_SIZE_YET:
         return (f.worst_stack_use, [])
-    visited = [f] + (visited if visited else [])
+    visited = [f] + (visited or [])
     result: tuple[int, list[FunctionCalleeEntry]] = (0, [])
 
     for call_edge in f.edges:

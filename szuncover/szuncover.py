@@ -2,9 +2,9 @@
 
 import argparse
 import logging
+import sys
 
 from calltree import (
-    ThreadStats,
     get_all_edges_from_vcg_graphs,
     get_vcg_graphs_from_build_dir,
     map_vcg_call_edges_to_call_entries,
@@ -13,7 +13,7 @@ from calltree import (
 from config import load_config
 from report_output import print_stack_size_report
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 
 def parse_args():

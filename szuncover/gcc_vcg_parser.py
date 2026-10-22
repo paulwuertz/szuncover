@@ -97,14 +97,14 @@ class VCG_Parser:
     def parse_vcg_attributes(attr_str: str):
         attribute_pattern = r'(\w+)\s*:\s*(?:"([^"]*)"|(\S+))'
         attributes = re.findall(attribute_pattern, attr_str)
-        parsed_dict = {match[0]: match[1] if match[1] else match[2] for match in attributes}
+        parsed_dict = {match[0]: match[1] or match[2] for match in attributes}
         return parsed_dict
 
     @staticmethod
     def parse_node(node_str: str) -> VCG_Node:
         attributes = VCG_Parser.parse_vcg_attributes(node_str)
-        title = attributes["title"] if "title" in attributes else ""
-        label = attributes["label"] if "label" in attributes else ""
+        title = attributes.get("title", "")
+        label = attributes.get("label", "")
         vcg_label = VCG_Parser.parse_vcg_label_attributes(label)
         if title and label:
             return VCG_Node(title=title, label=vcg_label)
@@ -116,9 +116,9 @@ class VCG_Parser:
     @staticmethod
     def parse_edge(node_str: str) -> VCG_Edge:
         attributes = VCG_Parser.parse_vcg_attributes(node_str)
-        sourcename = attributes["sourcename"] if "sourcename" in attributes else ""
-        targetname = attributes["targetname"] if "targetname" in attributes else ""
-        label = attributes["label"] if "label" in attributes else ""
+        sourcename = attributes.get("sourcename", "")
+        targetname = attributes.get("targetname", "")
+        label = attributes.get("label", "")
         if sourcename and targetname and label:
             return VCG_Edge(sourcename=sourcename, targetname=targetname, label=label)
         if sourcename and targetname:
@@ -144,7 +144,7 @@ class VCG_Parser:
         nodes = []
         edges = []
         for line in lines[1:]:
-            line = line[:-2] if line.endswith(" }") else line
+            line = line.removesuffix(" }")
             if line.startswith("node: { "):
                 node_str = line.replace("^node: { ", "")
                 n = VCG_Parser.parse_node(node_str)

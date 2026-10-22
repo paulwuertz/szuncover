@@ -1,3 +1,5 @@
+import sys
+
 from calltree import ThreadStats, deepest_call_tree
 
 

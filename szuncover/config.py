@@ -1,7 +1,8 @@
-import re
+import logging
 
 from pydantic import BaseModel
-from pydantic.experimental.missing_sentinel import MISSING
+
+logger = logging.getLogger()
 
 
 class ThreadConfig(BaseModel):
@@ -24,6 +25,6 @@ class SZuncoverConfig(BaseModel):
 def load_config(conf_path: str) -> SZuncoverConfig | None:
     try:
         return SZuncoverConfig.parse_file(path=conf_path)
-    except Exception as e:
-        print(e)
+    except BaseException:
+        logger.exception("Error loading szuncover config file")
         return None
