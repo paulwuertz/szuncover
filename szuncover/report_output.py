@@ -24,16 +24,19 @@ def print_stack_size_report(fn_callee_map, config):
                 f"/{thread_stack_size:>6} │{progressbar_20_full * '█'}{progressbar_20_empty * '-'}│"
             )
         else:
-            print(
-                f"│ {thread_fn_name:<30} - (function not found in build artifacts)     │"
-            )
+            print(f"│ {thread_fn_name:<30} - (function not found in build artifacts)     │")
     print("└" + 78 * "─" + "┘")
 
     print("WARNING: Given calltree info may limit this analysis: ")
     print("* number of functions with unresolved calls in thread:")
     for thread_fn_name, stats in threadStats.items():
         total_calls_to_unresolved_all_calls = sum(stats.unresolved_calls.values())
-        print("\t* ", thread_fn_name, ": ", len(stats.unresolved_calls), "resulting in ", total_calls_to_unresolved_all_calls, " missing calls in the calltree")
+        print(
+            "\t* %s: %d resulting in %d missing calls in the calltree",
+            thread_fn_name,
+            len(stats.unresolved_calls),
+            total_calls_to_unresolved_all_calls,
+        )
     print("* number of functions with missing stacksize in calltree:")
     for thread_fn_name, stats in threadStats.items():
         print("\t* ", thread_fn_name, ": ", len(stats.missing_stack_sizes))

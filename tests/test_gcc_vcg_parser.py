@@ -112,7 +112,3 @@ edge: { sourcename: "n0" targetname: "n1" label: "/app/src/led.c:219:3" }
         )
         test = VCG_Parser.parse_vcg_graph(test_graph)
         self.assertEqual(test, ref, "test minimal vcg graph parse matches")
-
-if __name__ == '__main__':
-    pass
-    #unittest.main()

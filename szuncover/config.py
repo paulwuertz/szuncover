@@ -20,9 +20,10 @@ class SZuncoverConfig(BaseModel):
     threads: list[ThreadConfig]
     dynamic_calls: list[DynamicCallResolutions]
 
-def load_config(conf_path: str) -> SZuncoverConfig:
+
+def load_config(conf_path: str) -> SZuncoverConfig | None:
     try:
         return SZuncoverConfig.parse_file(path=conf_path)
     except Exception as e:
         print(e)
-
+        return None

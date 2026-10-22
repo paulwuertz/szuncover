@@ -5,13 +5,23 @@ import sys
 from pydantic import BaseModel
 from pydantic.experimental.missing_sentinel import MISSING
 
-from gcc_vcg_parser import VCG_Graph, VCG_Parser, VCG_Label, VCG_Node, VCG_Edge, VCG_Graph, FunctionCalleeEntry, FunctionCallTree, GCC_INDIRECT_CALL_LABEL
+from gcc_vcg_parser import (
+    VCG_Graph,
+    VCG_Parser,
+    VCG_Label,
+    VCG_Node,
+    VCG_Edge,
+    VCG_Graph,
+    FunctionCalleeEntry,
+    FunctionCallTree,
+    GCC_INDIRECT_CALL_LABEL,
+)
 
 NO_WORST_STACK_SIZE_YET = -1
 
 
 class ThreadStats(BaseModel):
-    unresolved_calls: dict[str,int]
+    unresolved_calls: dict[str, int]
     missing_stack_sizes: list[str]
 
 
@@ -21,7 +31,7 @@ def find_files_with_extension(extension: str, top: str):
             yield os.path.join(path, name)
 
 
-def get_vcg_graphs_from_build_dir(build_dir: str):
+def get_vcg_graphs_from_build_dir(build_dir: str) -> list[VCG_Graph]:
     # print("parsing callgraph starting at %s" % build_dir)
     vcg_graphs = []
     call_files = find_files_with_extension("*.ci", build_dir)
@@ -34,22 +44,20 @@ def get_vcg_graphs_from_build_dir(build_dir: str):
     return vcg_graphs
 
 
-def get_all_edges_from_vcg_graphs(vcg_graphs: list[VCG_Graph]):
+def get_all_edges_from_vcg_graphs(vcg_graphs: list[VCG_Graph]) -> list[VCG_Edge]:
     all_edges = []
     for vcg_graph in vcg_graphs:
         all_edges += vcg_graph.edges
     return all_edges
 
 
-def map_vcg_nodes_to_call_entries(vcg_graphs: list[VCG_Graph]):
-    fn_callee_map = {}
+def map_vcg_nodes_to_call_entries(vcg_graphs: list[VCG_Graph]) -> dict[str, FunctionCalleeEntry]:
+    fn_callee_map: dict[str, FunctionCalleeEntry] = {}
     for vcg_graph in vcg_graphs:
         for n in vcg_graph.nodes:
-            fn_name = (
-                n.label.function_name
-                if "function_name" in n.label.model_fields_set
-                else n.title
-            )
+            has_label = "label" in n.model_fields_set
+            has_function_name = has_label and "function_name" in n.label.model_fields_set
+            fn_name = n.label.function_name if has_function_name else n.title
             if "." in fn_name:  # removes .constprop.0, .isra, ...
                 split_dots = fn_name.split(".")
                 fn_name = split_dots[0]
@@ -74,8 +82,10 @@ def map_vcg_nodes_to_call_entries(vcg_graphs: list[VCG_Graph]):
     return fn_callee_map
 
 
-def map_vcg_call_edges_to_call_entries(fn_callee_map: dict[str, FunctionCalleeEntry], edges: list[VCG_Edge]):
-    err_unmatched_edges = set()
+def map_vcg_call_edges_to_call_entries(
+    fn_callee_map: dict[str, FunctionCalleeEntry], edges: list[VCG_Edge]
+) -> dict[str, FunctionCalleeEntry]:
+    err_unmatched_edges: set[str] = set()
     for e in edges:
         fn_name = e.sourcename
         fn_name_and_path = fn_name.split(":", 1)
@@ -87,18 +97,21 @@ def map_vcg_call_edges_to_call_entries(fn_callee_map: dict[str, FunctionCalleeEn
         if fn_name in fn_callee_map:
             fn_callee_map[fn_name].edges += [e]
         else:
-            print("err #", len(err_unmatched_edges), " no node matches call edge:", e)
             err_unmatched_edges.add(fn_name)
+            print("err #", len(err_unmatched_edges), " no node matches call edge:", e)
     return fn_callee_map
 
 
 def deepest_call_tree(
-    f: FunctionCalleeEntry, fn_callee_map: dict[str, FunctionCalleeEntry], stats: ThreadStats, visited=None
-):
+    f: FunctionCalleeEntry,
+    fn_callee_map: dict[str, FunctionCalleeEntry],
+    stats: ThreadStats,
+    visited=None,
+) -> tuple[int, list[FunctionCalleeEntry]]:
     if f.worst_stack_use != NO_WORST_STACK_SIZE_YET:
         return (f.worst_stack_use, [])
     visited = [f] + (visited if visited else [])
-    result = (0, [])
+    result: tuple[int, list[FunctionCalleeEntry]] = (0, [])
 
     for call_edge in f.edges:
         if call_edge.targetname == GCC_INDIRECT_CALL_LABEL:

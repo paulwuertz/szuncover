@@ -8,23 +8,23 @@ GCC_INDIRECT_CALL_LABEL = "__indirect_call"
 
 # TODO add dynamic allocation parsing?
 class VCG_Label(BaseModel):
-    file_name: str | None | MISSING = MISSING
-    function_name: str | None | MISSING = MISSING
-    line: int | None | MISSING = MISSING
-    column: int | None | MISSING = MISSING
-    stack_size: int | None | MISSING = MISSING
-    stack_qualifier: str | None | MISSING = MISSING
+    file_name: str | MISSING = MISSING
+    function_name: str | MISSING = MISSING
+    line: int | MISSING = MISSING
+    column: int | MISSING = MISSING
+    stack_size: int | MISSING = MISSING
+    stack_qualifier: str | MISSING = MISSING
 
 
 class VCG_Node(BaseModel):
-    title: str | None | MISSING = MISSING
-    label: VCG_Label | None | MISSING = MISSING
+    title: str
+    label: VCG_Label | MISSING = MISSING
 
 
 class VCG_Edge(BaseModel):
     sourcename: str
     targetname: str
-    label: str | None | MISSING = MISSING
+    label: str | MISSING = MISSING
 
 
 class VCG_Graph(BaseModel):
@@ -36,8 +36,8 @@ class VCG_Graph(BaseModel):
 class FunctionCalleeEntry(BaseModel):
     title: str
     node: VCG_Node
-    node_declaration: str | None | MISSING = MISSING
-    node_definition: str | None | MISSING = MISSING
+    node_declaration: str | MISSING = MISSING
+    node_definition: str | MISSING = MISSING
     edges: list[VCG_Edge]
     worst_stack_use: int
     visited: bool
@@ -45,8 +45,8 @@ class FunctionCalleeEntry(BaseModel):
 
 class FunctionCallTree(BaseModel):
     root: FunctionCalleeEntry
-    node_declaration: str | None | MISSING = MISSING
-    node_definition: str | None | MISSING = MISSING
+    node_declaration: str | MISSING = MISSING
+    node_definition: str | MISSING = MISSING
     edges: list[VCG_Edge]
 
 
@@ -64,7 +64,6 @@ class VCG_Parser:
         line = int(fp_split[-2]) if len(fp_split) >= 3 and fp_split[-2] else None
         column = int(fp_split[-1]) if len(fp_split) >= 3 and fp_split[-1] else None
         file_name = ":".join(fp_split[:-2]) if len(fp_split) >= 3 and fp_split[0] else None
-        are_base_callgraph_attr_ok = function_name and line and column and file_name
         # callgraph with su MARKERS - Match stacksize and qualifier in i.e. '15 bytes (static)'
         stacksize_marker = vcg_label_lines[2] if len(vcg_label_lines) >= 3 else ""
         match = re.search(VCG_Parser.su_marker_pattern, stacksize_marker)
@@ -74,14 +73,14 @@ class VCG_Parser:
             return VCG_Label(
                 function_name=function_name,
             )
-        if are_base_callgraph_attr_ok and len(vcg_label_lines) == 2:
+        if function_name and line and column and file_name and len(vcg_label_lines) == 2:
             return VCG_Label(
                 function_name=function_name,
                 file_name=file_name,
                 line=line,
                 column=column,
             )
-        elif are_base_callgraph_attr_ok and len(vcg_label_lines) >= 3:
+        elif function_name and line and column and file_name and stack_size and stack_qualifier:
             return VCG_Label(
                 function_name=function_name,
                 file_name=file_name,
@@ -102,29 +101,31 @@ class VCG_Parser:
         return parsed_dict
 
     @staticmethod
-    def parse_node(node_str: str):
+    def parse_node(node_str: str) -> VCG_Node:
         attributes = VCG_Parser.parse_vcg_attributes(node_str)
-        title = attributes["title"] if "title" in attributes else None
-        label = attributes["label"] if "label" in attributes else None
+        title = attributes["title"] if "title" in attributes else ""
+        label = attributes["label"] if "label" in attributes else ""
         vcg_label = VCG_Parser.parse_vcg_label_attributes(label)
         if title and label:
             return VCG_Node(title=title, label=vcg_label)
         if title:
             return VCG_Node(title=title)
         else:
-            return VCG_Node()
+            return VCG_Node(title=title)  # TODO error handling/logwarning?
 
     @staticmethod
-    def parse_edge(node_str: str):
+    def parse_edge(node_str: str) -> VCG_Edge:
         attributes = VCG_Parser.parse_vcg_attributes(node_str)
-        sourcename = attributes["sourcename"] if "sourcename" in attributes else None
-        targetname = attributes["targetname"] if "targetname" in attributes else None
-        label = attributes["label"] if "label" in attributes else None
-        if sourcename and targetname:
+        sourcename = attributes["sourcename"] if "sourcename" in attributes else ""
+        targetname = attributes["targetname"] if "targetname" in attributes else ""
+        label = attributes["label"] if "label" in attributes else ""
+        if sourcename and targetname and label:
             return VCG_Edge(sourcename=sourcename, targetname=targetname, label=label)
+        if sourcename and targetname:
+            return VCG_Edge(sourcename=sourcename, targetname=targetname)
         else:
             # TODO log error/warning or empty ok?
-            return VCG_Edge()
+            return VCG_Edge(sourcename=sourcename, targetname=targetname)
 
     @staticmethod
     def parse_vcg_graph(graph_str: str):

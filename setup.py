@@ -21,16 +21,16 @@ For function calls not know at compile-time via function pointers a list of dyna
 version = '0.0.1'
 
 setuptools.setup(
-    author='Zephyr Project',
-    author_email='devel@lists.zephyrproject.org',
-    name='devicetree',
+    author='Paul Würtz',
+    author_email='paulwuertz@posteo.de',
+    name='szuncover',
     version=version,
     description='Python library for stack-size estimation',
     long_description=long_description,
     long_description_content_type="text/x-rst",
     url='https://github.com/zephyrproject-rtos/zephyr',
-    packages=setuptools.find_packages(where='src'),
-    package_dir={'': 'src'},
+    packages=setuptools.find_packages(where='szuncover'),
+    package_dir={'': 'szuncover'},
     classifiers=[
         'Programming Language :: Python :: 3 :: Only',
         'License :: OSI Approved :: Apache Software License',

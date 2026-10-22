@@ -15,6 +15,7 @@ from report_output import print_stack_size_report
 
 logger = logging.getLogger(__name__)
 
+
 def parse_args():
     """Parse command line arguments"""
     argparser = argparse.ArgumentParser(allow_abbrev=False)
