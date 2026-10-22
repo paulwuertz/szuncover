@@ -1,0 +1,16 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "szuncover",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "/home/paul/zephyr/scripts/szuncover/szuncover/szuncover.py",
+            "console": "integratedTerminal",
+            "args": "--build_dir /home/paul/git/cannecti/build/ --config_file /home/paul/Downloads/pexplorer.json --debug"
+        }
+    ]
+}
