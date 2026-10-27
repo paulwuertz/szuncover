@@ -1,6 +1,6 @@
 [project]
 name = "szuncover"
-version = "0.1.0"
+version = "0.1.1"
 description = "Uncover stack-usages for your threads"
 long_description = """
 
@@ -22,7 +22,6 @@ requires-python = ">=3.12"
 dependencies = [
     "pydantic>=2.13.5",
 ]
-dynamic = ["classifiers"]
 
 [project.scripts]
 szuncover = "szuncover.szuncover:main"
@@ -36,10 +35,11 @@ preview = true
 line-length = 100
 
 [build-system]
-# use the poetry build backend, which enables automatic classifier generation
-# see https://github.com/astral-sh/uv/issues/8716
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["uv_build >= 0.12.19, <0.13.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-root = ""
 
 [dependency-groups]
 dev = [
@@ -51,14 +51,14 @@ dev = [
     "pydantic>=2.13.3",
 ]
 
-[tool.poetry]
+[tool.setuptools]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Natural Language :: English",
 ]
-packages = [{ include = "szuncover" }]
-include = [
-    { path = "szuncover/*", format = ["wheel", "sdist"] },
-]
-exclude = ["tests"]
+
+[tool.setuptools.packages.find]
+where = ["szuncover"]
+include = [ "szuncover*" ]
+namespaces = false

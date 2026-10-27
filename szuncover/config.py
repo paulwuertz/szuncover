@@ -1,6 +1,7 @@
 import logging
 
 from pydantic import BaseModel
+from pydantic_core import from_json
 
 logger = logging.getLogger()
 
@@ -28,3 +29,7 @@ def load_config(conf_path: str) -> SZuncoverConfig | None:
     except BaseException:
         logger.exception("Error loading szuncover config file")
         return None
+
+
+def load_config_from_str(config: str) -> SZuncoverConfig | None:
+    return SZuncoverConfig.model_validate(from_json(config, allow_partial=True))

@@ -3,3 +3,4 @@ szuncover/python_szuncover.egg-info/
 szuncover/szuncover.egg-info/
 tests/__pycache__/
 .vscode
+dist/

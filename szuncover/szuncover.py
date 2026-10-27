@@ -4,14 +4,14 @@ import argparse
 import logging
 import sys
 
-from calltree import (
+from szuncover.calltree import (
     get_all_edges_from_vcg_graphs,
     get_vcg_graphs_from_build_dir,
     map_vcg_call_edges_to_call_entries,
     map_vcg_nodes_to_call_entries,
 )
-from config import load_config
-from report_output import print_stack_size_report
+from szuncover.config import load_config
+from szuncover.report_output import print_stack_size_report
 
 logger = logging.getLogger()
 
@@ -47,7 +47,6 @@ def main():
     fn_callee_map = map_vcg_call_edges_to_call_entries(call_entries, edges)
 
     print_stack_size_report(fn_callee_map, conf)
-    print("hi")
 
 
 if __name__ == "__main__":

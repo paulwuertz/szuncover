@@ -1,16 +1,20 @@
 import fnmatch
+import logging
 import os
 
-from gcc_vcg_parser import (
+from pydantic import BaseModel
+
+from szuncover.gcc_vcg_parser import (
     GCC_INDIRECT_CALL_LABEL,
     FunctionCalleeEntry,
     VCG_Edge,
     VCG_Graph,
     VCG_Parser,
 )
-from pydantic import BaseModel
 
 NO_WORST_STACK_SIZE_YET = -1
+
+logger = logging.getLogger()
 
 
 class ThreadStats(BaseModel):
@@ -92,7 +96,7 @@ def map_vcg_call_edges_to_call_entries(
             fn_callee_map[fn_name].edges += [e]
         else:
             err_unmatched_edges.add(fn_name)
-            print("err #", len(err_unmatched_edges), " no node matches call edge:", e)
+            logger.debug(f"err #{len(err_unmatched_edges)} no node matches call edge: {e}")
     return fn_callee_map
 
 

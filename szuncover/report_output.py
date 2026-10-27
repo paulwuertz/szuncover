@@ -1,6 +1,6 @@
 import sys
 
-from calltree import ThreadStats, deepest_call_tree
+from szuncover.calltree import ThreadStats, deepest_call_tree
 
 
 def print_stack_size_report(fn_callee_map, config):
