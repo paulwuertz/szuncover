@@ -1,8 +1,7 @@
 import fnmatch
 import logging
 import os
-
-from pydantic import BaseModel
+from dataclasses import dataclass
 
 from szuncover.gcc_vcg_parser import (
     GCC_INDIRECT_CALL_LABEL,
@@ -17,7 +16,8 @@ NO_WORST_STACK_SIZE_YET = -1
 logger = logging.getLogger()
 
 
-class ThreadStats(BaseModel):
+@dataclass
+class ThreadStats:
     unresolved_calls: dict[str, int]
     missing_stack_sizes: list[str]
 
@@ -53,8 +53,7 @@ def map_vcg_nodes_to_call_entries(vcg_graphs: list[VCG_Graph]) -> dict[str, Func
     fn_callee_map: dict[str, FunctionCalleeEntry] = {}
     for vcg_graph in vcg_graphs:
         for n in vcg_graph.nodes:
-            has_label = "label" in n.model_fields_set
-            has_function_name = has_label and "function_name" in n.label.model_fields_set
+            has_function_name = n.label.function_name
             fn_name = n.label.function_name if has_function_name else n.title
             if "." in fn_name:  # removes .constprop.0, .isra, ...
                 split_dots = fn_name.split(".")

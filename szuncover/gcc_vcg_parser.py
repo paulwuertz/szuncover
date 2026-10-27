@@ -1,53 +1,57 @@
 import re
-
-from pydantic import BaseModel
-from pydantic.experimental.missing_sentinel import MISSING
+from dataclasses import dataclass
 
 GCC_INDIRECT_CALL_LABEL = "__indirect_call"
 
 
 # TODO add dynamic allocation parsing?
-class VCG_Label(BaseModel):
-    file_name: str | MISSING = MISSING
-    function_name: str | MISSING = MISSING
-    line: int | MISSING = MISSING
-    column: int | MISSING = MISSING
-    stack_size: int | MISSING = MISSING
-    stack_qualifier: str | MISSING = MISSING
+@dataclass
+class VCG_Label:
+    file_name: str | None = None
+    function_name: str | None = None
+    line: int | None = None
+    column: int | None = None
+    stack_size: int | None = None
+    stack_qualifier: str | None = None
 
 
-class VCG_Node(BaseModel):
+@dataclass
+class VCG_Node:
     title: str
-    label: VCG_Label | MISSING = MISSING
+    label: VCG_Label | None = None
 
 
-class VCG_Edge(BaseModel):
+@dataclass
+class VCG_Edge:
     sourcename: str
     targetname: str
-    label: str | MISSING = MISSING
+    label: str | None = None
 
 
-class VCG_Graph(BaseModel):
+@dataclass
+class VCG_Graph:
     title: str
     nodes: list[VCG_Node]
     edges: list[VCG_Edge]
 
 
-class FunctionCalleeEntry(BaseModel):
+@dataclass
+class FunctionCalleeEntry:
     title: str
     node: VCG_Node
-    node_declaration: str | MISSING = MISSING
-    node_definition: str | MISSING = MISSING
     edges: list[VCG_Edge]
     worst_stack_use: int
     visited: bool
+    node_declaration: str | None = None
+    node_definition: str | None = None
 
 
-class FunctionCallTree(BaseModel):
+@dataclass
+class FunctionCallTree:
     root: FunctionCalleeEntry
-    node_declaration: str | MISSING = MISSING
-    node_definition: str | MISSING = MISSING
     edges: list[VCG_Edge]
+    node_declaration: str | None = None
+    node_definition: str | None = None
 
 
 class VCG_Parser:
