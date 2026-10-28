@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
+import importlib.metadata
 import logging
 import sys
 
@@ -14,6 +15,7 @@ from szuncover.config import load_config
 from szuncover.report_output import print_stack_size_report
 
 logger = logging.getLogger()
+version = importlib.metadata.version("szuncover")
 
 
 def parse_args():
@@ -51,6 +53,7 @@ def parse_args():
     """,
     )
     argparser.add_argument("--debug", action="store_true", help="Print extra debugging information")
+    argparser.add_argument("--version", action="version", version="%(prog)s " + version)
 
     return argparser.parse_args()
 
