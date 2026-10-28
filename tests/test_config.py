@@ -8,24 +8,17 @@ from .test_ctx import *
 class Test_Config(unittest.TestCase):
     def test_parse_graph_minimal(self):
         test_config_str = """
-         {
-    "threads": [
-        { "thread_entry_name": "a", "stack_size": 128 },
-        { "thread_entry_name": "b", "stack_size": 256 },
-        { "thread_entry_name": "c", "stack_size": 1024 }
-    ],
-    "dynamic_calls": [
         {
-            "caller": "gs_usb_rx_thread",
-            "callees": [ "cannectivity_led_event" ]
-        },
-        {
-            "caller": "net_buf_unref",
-            "callees": [ null ]
+            "threads": [
+                { "thread_entry_name": "a", "stack_size": 128 },
+                { "thread_entry_name": "b", "stack_size": 256 },
+                { "thread_entry_name": "c", "stack_size": 1024 }
+            ],
+            "dynamic_calls": [
+                { "caller": "a", "callees": [ "c" ] },
+                { "caller": "b", "callees": [ null ] }
+            ]
         }
-    ]
-}
-
         """
         test_conf = load_config_from_str(test_config_str)
         # thread entry size
@@ -35,7 +28,5 @@ class Test_Config(unittest.TestCase):
         self.assertEqual(test_conf.threads[1].stack_size, 256, "thread entry name correct")
         # dynamic_calls entry size
         self.assertEqual(len(test_conf.dynamic_calls), 2, "len fns define dynamic calls")
-        self.assertEqual(
-            test_conf.dynamic_calls[0].caller, "gs_usb_rx_thread", "dynamic caller name"
-        )
+        self.assertEqual(test_conf.dynamic_calls[0].caller, "a", "dynamic caller name")
         self.assertEqual(len(test_conf.dynamic_calls[0].callees), 1, "fns dynamic call len matches")

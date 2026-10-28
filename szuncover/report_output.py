@@ -1,11 +1,14 @@
+import logging
 import sys
 
 from szuncover.calltree import ThreadStats, deepest_call_tree
 
+logger = logging.getLogger()
+
 
 def print_stack_size_report(fn_callee_map, config):
     overflows = False
-    print("┌" + 78 * "─" + "┐")
+    logger.info("┌" + 78 * "─" + "┐")
     threadStats = {}
     for thread in config.threads:
         thread_fn_name = thread.thread_entry_name
@@ -21,24 +24,24 @@ def print_stack_size_report(fn_callee_map, config):
             progressbar_20_full = int(stack_use_percent / 100.0 * 20)
             progressbar_20_empty = 20 - progressbar_20_full
             # │ log_process_thread_func   - 100.0% - 11111/22222 - │███████████████-----│
-            print(
+            logger.info(
                 f"│ {thread_fn_name:<30} - ({f'{stack_use_percent:.1f}':>5}%) {worst_stack_size:>6}"
                 f"/{thread_stack_size:>6} │{progressbar_20_full * '█'}{progressbar_20_empty * '-'}│"
             )
         else:
-            print(f"│ {thread_fn_name:<30} - (function not found in build artifacts)     │")
-    print("└" + 78 * "─" + "┘")
+            logger.info(f"│ {thread_fn_name:<30} - (function not found in build artifacts)     │")
+    logger.info("└" + 78 * "─" + "┘")
 
-    print("WARNING: Given calltree info may limit this analysis: ")
-    print("* number of functions with unresolved calls in thread:")
+    logger.warning("WARNING: Given calltree info may limit this analysis: ")
+    logger.warning("* number of functions with unresolved calls in thread:")
     for thread_fn_name, stats in threadStats.items():
         total_calls_to_unresolved_all_calls = sum(stats.unresolved_calls.values())
-        print(
+        logger.warning(
             f"\t* {thread_fn_name}: {len(stats.unresolved_calls)} resulting in {total_calls_to_unresolved_all_calls} missing calls in the calltree"
         )
-    print("* number of functions with missing stacksize in calltree:")
+    logger.warning("* number of functions with missing stacksize in calltree:")
     for thread_fn_name, stats in threadStats.items():
-        print("\t* ", thread_fn_name, ": ", len(stats.missing_stack_sizes))
+        logger.warning(f"\t* {thread_fn_name}: {len(stats.missing_stack_sizes)}")
 
     if overflows:
         sys.exit(1)
