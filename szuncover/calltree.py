@@ -19,7 +19,7 @@ logger = logging.getLogger()
 @dataclass
 class ThreadStats:
     unresolved_calls: dict[str, int]
-    missing_stack_sizes: list[str]
+    missing_stack_sizes: set[str]
 
 
 def find_files_with_extension(extension: str, top: str):
@@ -99,6 +99,11 @@ def map_vcg_call_edges_to_call_entries(
     return fn_callee_map
 
 
+def reset_node_visits(fn_callee_map: dict[str, FunctionCalleeEntry]):
+    for fn in fn_callee_map.values():
+        fn.visited = False
+
+
 def deepest_call_tree(
     f: FunctionCalleeEntry,
     fn_callee_map: dict[str, FunctionCalleeEntry],
@@ -132,7 +137,7 @@ def deepest_call_tree(
                 result = candidate
 
     if not isinstance(f.node.label.stack_size, int):
-        stats.missing_stack_sizes += [f.title]
+        stats.missing_stack_sizes.add(f.title)
     stack_size = f.node.label.stack_size if isinstance(f.node.label.stack_size, int) else 0
     result = (result[0] + stack_size, [f] + result[1])
     f.worst_stack_use = result[0]

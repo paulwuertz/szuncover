@@ -12,7 +12,7 @@ from szuncover.calltree import (
     map_vcg_nodes_to_call_entries,
 )
 from szuncover.config import load_config
-from szuncover.report_output import print_stack_size_report
+from szuncover.report_output import print_markdown_stack_size_report, print_stack_size_report
 
 logger = logging.getLogger()
 version = importlib.metadata.version("szuncover")
@@ -53,6 +53,12 @@ def parse_args():
     """,
     )
     argparser.add_argument("--debug", action="store_true", help="Print extra debugging information")
+    argparser.add_argument(
+        "--markdown_output",
+        "--md",
+        action="store_true",
+        help="Print info in gitlab flavor markdown",
+    )
     argparser.add_argument("--version", action="version", version="%(prog)s " + version)
 
     return argparser.parse_args()
@@ -78,7 +84,10 @@ def main():
     call_entries = map_vcg_nodes_to_call_entries(vcg_graphs)
     fn_callee_map = map_vcg_call_edges_to_call_entries(call_entries, edges)
 
-    print_stack_size_report(fn_callee_map, conf)
+    if args.markdown_output:
+        print_markdown_stack_size_report(fn_callee_map, conf)
+    else:
+        print_stack_size_report(fn_callee_map, conf)
 
 
 if __name__ == "__main__":

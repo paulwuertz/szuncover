@@ -18,13 +18,13 @@ Given a config file a list of threads and associtated stack sizes a report will 
 For dynamic function-calls not know at compile-time a list of dynamic-calls can complete this missing parts of the runtime callgraph to get better results in the estimation.
 """
 
-version = "0.1.3"
+__version__ = "0.1.3"
 
 setuptools.setup(
     author="Paul Würtz",
     author_email="paulwuertz@posteo.de",
     name="szuncover",
-    version=version,
+    version=__version__,
     description="Uncover stack-usages for your threads",
     long_description=long_description,
     long_description_content_type="text/x-rst",
