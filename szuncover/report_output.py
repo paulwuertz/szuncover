@@ -40,7 +40,7 @@ def print_stack_size_report(fn_callee_map: dict[str, FunctionCalleeEntry], confi
         reset_node_visits(fn_callee_map)
         if thread_fn_name in fn_callee_map:
             fn_node = fn_callee_map[thread_fn_name]
-            stats = ThreadStats(unresolved_calls={}, missing_stack_sizes=set())
+            stats = MissingStats(unresolved_calls={}, missing_stack_sizes=set(), missing_calls=[])
             thread_calltree = deepest_call_tree(fn_node, fn_callee_map, stats)
             threadStats[thread_fn_name] = stats
             worst_stack_size = thread_calltree[0]
@@ -72,7 +72,6 @@ def print_stack_size_report(fn_callee_map: dict[str, FunctionCalleeEntry], confi
     if has_overflows:
         sys.exit(1)
 
-
 def print_markdown_stack_size_report(
     fn_callee_map: dict[str, FunctionCalleeEntry], config: SZuncoverConfig
 ):
@@ -92,7 +91,7 @@ def print_markdown_stack_size_report(
 
         if thread_name in fn_callee_map:
             fn_node = fn_callee_map[thread_name]
-            stats = ThreadStats(unresolved_calls={}, missing_stack_sizes=set())
+            stats = MissingStats(unresolved_calls={}, missing_stack_sizes=set(), missing_calls=[])
             worst_stack_size, thread_worst_calltree = deepest_call_tree(
                 fn_node, fn_callee_map, stats
             )
@@ -144,6 +143,22 @@ def print_markdown_stack_size_report(
         logger.info(
             f"* {thread_name} at least {sum(stats.unresolved_calls.values())} dynamic calls in {len(stats.unresolved_calls.keys())} functions left to resolve. {len(stats.missing_stack_sizes)} functions with missing stack sizes."
         )
+
+    stats = get_total_missings(fn_callee_map)
+    totalNrDynamicCalls = sum(stats.unresolved_calls.values())
+    nrFunctionsWithDynamicCalls = len(stats.unresolved_calls)
+    nrFunctionsWithoutStackSize = len(stats.missing_stack_sizes)
+    nrFunctionsWithMissingCalls = len(stats.missing_calls) # TODO zero...
+    nrCalls = sum(len(f.edges) for f in fn_callee_map.values())
+
+    # totalNrResolvedCalls TODO not just count configured but successfully mapped calls
+    print("\n**Consider adding or extending a config and add unresolved calls for better results**")
+    print(f"\nThere are in {len(fn_callee_map)} functions and {nrCalls} calls at least:\n\n* {totalNrDynamicCalls} dynamic calls in {nrFunctionsWithDynamicCalls} functions left to resolve")
+    print(f"* {nrFunctionsWithoutStackSize} functions without stacksize (ofen from linked libraries)")
+    print(f"* {nrFunctionsWithMissingCalls} function calls which could not be found")
+    #%d dynamic calls are already resolved.\n"
+    print("\n**Note**: The actual number of dynamic calls might be higher then the number of dynamic branch instructions.")
+    print("      Like in a workqueue a single dynamic branch can execute more then on work tasks.")
 
     if has_overflows:
         sys.exit(1)

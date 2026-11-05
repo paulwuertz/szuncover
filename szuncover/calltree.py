@@ -17,8 +17,9 @@ logger = logging.getLogger()
 
 
 @dataclass
-class ThreadStats:
+class MissingStats:
     unresolved_calls: dict[str, int]
+    missing_calls: list[tuple[str, str]]
     missing_stack_sizes: set[str]
 
 
@@ -104,10 +105,39 @@ def reset_node_visits(fn_callee_map: dict[str, FunctionCalleeEntry]):
         fn.visited = False
 
 
+def get_missings_fn_stats(fn: FunctionCalleeEntry, fn_callee_map: dict[str, FunctionCalleeEntry], stats: MissingStats | None) -> MissingStats:
+    # if a stats is given amends, else start with an empty one
+    stats = stats or MissingStats(unresolved_calls={}, missing_stack_sizes=set())
+    if not isinstance(fn.node.label.stack_size, int):
+        stats.missing_stack_sizes.add(fn.title)
+    for call_edge in fn.edges:
+        # log indirect calls
+        if call_edge.targetname == GCC_INDIRECT_CALL_LABEL:
+            if fn.title in stats.unresolved_calls:
+                stats.unresolved_calls[fn.title] += 1
+            else:
+                stats.unresolved_calls[fn.title] = 1
+        # log missing calls
+        fn_target_name_and_path = call_edge.targetname.split(":", 1)
+        callee_name = call_edge.targetname
+        if callee_name not in fn_callee_map and len(fn_target_name_and_path) == 2:
+            callee_name = fn_target_name_and_path[1]
+        if "." in callee_name:  # removes .constprop.0, .isra, ...
+            split_dots = callee_name.split(".")
+            callee_name = split_dots[0]
+        if callee_name not in fn_callee_map:
+            stats.missing_calls += [(fn.title, callee_name)]
+
+def get_total_missings(fn_callee_map: dict[str, FunctionCalleeEntry]):
+    stats = MissingStats(unresolved_calls={}, missing_stack_sizes=set(), missing_calls=[])
+    for fn in fn_callee_map.values():
+        get_missings_fn_stats(fn, fn_callee_map, stats)
+    return stats
+
 def deepest_call_tree(
     f: FunctionCalleeEntry,
     fn_callee_map: dict[str, FunctionCalleeEntry],
-    stats: ThreadStats,
+    stats: MissingStats,
     visited=None,
 ) -> tuple[int, list[FunctionCalleeEntry]]:
     if f.worst_stack_use != NO_WORST_STACK_SIZE_YET:
@@ -117,10 +147,7 @@ def deepest_call_tree(
 
     for call_edge in f.edges:
         if call_edge.targetname == GCC_INDIRECT_CALL_LABEL:
-            if f.title in stats.unresolved_calls:
-                stats.unresolved_calls[f.title] += 1
-            else:
-                stats.unresolved_calls[f.title] = 1
+            continue # TODO handle configured dynamic calls
         fn_target_name_and_path = call_edge.targetname.split(":", 1)
         callee_name = call_edge.targetname
         if callee_name not in fn_callee_map and len(fn_target_name_and_path) == 2:
@@ -136,8 +163,6 @@ def deepest_call_tree(
             if candidate[0] > result[0]:
                 result = candidate
 
-    if not isinstance(f.node.label.stack_size, int):
-        stats.missing_stack_sizes.add(f.title)
     stack_size = f.node.label.stack_size if isinstance(f.node.label.stack_size, int) else 0
     result = (result[0] + stack_size, [f] + result[1])
     f.worst_stack_use = result[0]
