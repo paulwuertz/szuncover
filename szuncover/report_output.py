@@ -1,7 +1,12 @@
 import logging
 import sys
 
-from szuncover.calltree import ThreadStats, deepest_call_tree, reset_node_visits
+from szuncover.calltree import (
+    MissingStats,
+    deepest_call_tree,
+    get_total_missings,
+    reset_node_visits,
+)
 from szuncover.config import SZuncoverConfig
 from szuncover.gcc_vcg_parser import FunctionCalleeEntry
 
@@ -71,6 +76,7 @@ def print_stack_size_report(fn_callee_map: dict[str, FunctionCalleeEntry], confi
 
     if has_overflows:
         sys.exit(1)
+
 
 def print_markdown_stack_size_report(
     fn_callee_map: dict[str, FunctionCalleeEntry], config: SZuncoverConfig
@@ -148,16 +154,22 @@ def print_markdown_stack_size_report(
     totalNrDynamicCalls = sum(stats.unresolved_calls.values())
     nrFunctionsWithDynamicCalls = len(stats.unresolved_calls)
     nrFunctionsWithoutStackSize = len(stats.missing_stack_sizes)
-    nrFunctionsWithMissingCalls = len(stats.missing_calls) # TODO zero...
+    nrFunctionsWithMissingCalls = len(stats.missing_calls)  # TODO zero...
     nrCalls = sum(len(f.edges) for f in fn_callee_map.values())
 
     # totalNrResolvedCalls TODO not just count configured but successfully mapped calls
     print("\n**Consider adding or extending a config and add unresolved calls for better results**")
-    print(f"\nThere are in {len(fn_callee_map)} functions and {nrCalls} calls at least:\n\n* {totalNrDynamicCalls} dynamic calls in {nrFunctionsWithDynamicCalls} functions left to resolve")
-    print(f"* {nrFunctionsWithoutStackSize} functions without stacksize (ofen from linked libraries)")
+    print(
+        f"\nThere are in {len(fn_callee_map)} functions and {nrCalls} calls at least:\n\n* {totalNrDynamicCalls} dynamic calls in {nrFunctionsWithDynamicCalls} functions left to resolve"
+    )
+    print(
+        f"* {nrFunctionsWithoutStackSize} functions without stacksize (ofen from linked libraries)"
+    )
     print(f"* {nrFunctionsWithMissingCalls} function calls which could not be found")
-    #%d dynamic calls are already resolved.\n"
-    print("\n**Note**: The actual number of dynamic calls might be higher then the number of dynamic branch instructions.")
+    # %d dynamic calls are already resolved.\n"
+    print(
+        "\n**Note**: The actual number of dynamic calls might be higher then the number of dynamic branch instructions."
+    )
     print("      Like in a workqueue a single dynamic branch can execute more then on work tasks.")
 
     if has_overflows:

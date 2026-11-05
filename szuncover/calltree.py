@@ -105,7 +105,11 @@ def reset_node_visits(fn_callee_map: dict[str, FunctionCalleeEntry]):
         fn.visited = False
 
 
-def get_missings_fn_stats(fn: FunctionCalleeEntry, fn_callee_map: dict[str, FunctionCalleeEntry], stats: MissingStats | None) -> MissingStats:
+def get_missings_fn_stats(
+    fn: FunctionCalleeEntry,
+    fn_callee_map: dict[str, FunctionCalleeEntry],
+    stats: MissingStats | None,
+) -> MissingStats:
     # if a stats is given amends, else start with an empty one
     stats = stats or MissingStats(unresolved_calls={}, missing_stack_sizes=set())
     if not isinstance(fn.node.label.stack_size, int):
@@ -128,11 +132,13 @@ def get_missings_fn_stats(fn: FunctionCalleeEntry, fn_callee_map: dict[str, Func
         if callee_name not in fn_callee_map:
             stats.missing_calls += [(fn.title, callee_name)]
 
+
 def get_total_missings(fn_callee_map: dict[str, FunctionCalleeEntry]):
     stats = MissingStats(unresolved_calls={}, missing_stack_sizes=set(), missing_calls=[])
     for fn in fn_callee_map.values():
         get_missings_fn_stats(fn, fn_callee_map, stats)
     return stats
+
 
 def deepest_call_tree(
     f: FunctionCalleeEntry,
@@ -147,7 +153,7 @@ def deepest_call_tree(
 
     for call_edge in f.edges:
         if call_edge.targetname == GCC_INDIRECT_CALL_LABEL:
-            continue # TODO handle configured dynamic calls
+            continue  # TODO handle configured dynamic calls
         fn_target_name_and_path = call_edge.targetname.split(":", 1)
         callee_name = call_edge.targetname
         if callee_name not in fn_callee_map and len(fn_target_name_and_path) == 2:
