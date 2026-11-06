@@ -3,6 +3,7 @@ import logging
 import os
 from dataclasses import dataclass
 
+from szuncover.config import ThreadConfig
 from szuncover.gcc_vcg_parser import (
     GCC_INDIRECT_CALL_LABEL,
     FunctionCalleeEntry,
@@ -21,6 +22,16 @@ class MissingStats:
     unresolved_calls: dict[str, int]
     missing_calls: list[tuple[str, str]]
     missing_stack_sizes: set[str]
+
+
+@dataclass
+class ThreadStats:
+    config: ThreadConfig
+    errors: MissingStats
+    max_stack_call_path: list[FunctionCalleeEntry] | None = None
+    root: FunctionCalleeEntry | None = None
+    has_overflows: bool = False
+    stack_use_percent: float = 0.0
 
 
 def find_files_with_extension(extension: str, top: str):
@@ -119,6 +130,7 @@ def get_missings_fn_stats(
                 stats.unresolved_calls[fn.title] += 1
             else:
                 stats.unresolved_calls[fn.title] = 1
+            continue
         # log missing calls
         fn_target_name_and_path = call_edge.targetname.split(":", 1)
         callee_name = call_edge.targetname
@@ -149,6 +161,7 @@ def deepest_call_tree(
     visited = [f] + (visited or [])
     result: tuple[int, list[FunctionCalleeEntry]] = (0, [])
 
+    get_missings_fn_stats(f, fn_callee_map, stats)
     for call_edge in f.edges:
         if call_edge.targetname == GCC_INDIRECT_CALL_LABEL:
             continue  # TODO handle configured dynamic calls

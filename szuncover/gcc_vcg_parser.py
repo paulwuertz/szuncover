@@ -46,14 +46,6 @@ class FunctionCalleeEntry:
     node_definition: str | None = None
 
 
-@dataclass
-class FunctionCallTree:
-    root: FunctionCalleeEntry
-    edges: list[VCG_Edge]
-    node_declaration: str | None = None
-    node_definition: str | None = None
-
-
 class VCG_Parser:
     su_marker_pattern = r"(\d+)\s+bytes\s+\((.*?)\)"
 

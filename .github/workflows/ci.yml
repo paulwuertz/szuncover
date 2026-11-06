@@ -52,8 +52,7 @@ jobs:
         # setup-python's version support is limited by runner version:
         # https://raw.githubusercontent.com/actions/python-versions/main/versions-manifest.json
         os: [
-            ubuntu-22.04,
-            macos-14,
+            ubuntu-26.04,
             windows-2025
           ]
       fail-fast: false
