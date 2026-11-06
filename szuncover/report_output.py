@@ -78,16 +78,12 @@ def print_stack_size_report(fn_callee_map: dict[str, FunctionCalleeEntry], confi
         sys.exit(1)
 
 
-def print_markdown_stack_size_report(
-    fn_callee_map: dict[str, FunctionCalleeEntry], config: SZuncoverConfig
-):
+def print_markdown_stack_size_report(fn_callee_map: dict[str, FunctionCalleeEntry], config: SZuncoverConfig):
     has_overflows = False
     logger.info("## Stack check\n\n")
     logger.info("### Stack usage summary\n\n")
     threadInfos = {}
-    logger.info(
-        "| Thread name | Max Stack Use | Usage %% | Unresolved calls | Missing stacksizes |"
-    )
+    logger.info("| Thread name | Max Stack Use | Usage %% | Unresolved calls | Missing stacksizes |")
     logger.info("| ----------- | ----------- | ----------- | ----------- | ----------- |")
     for conf_thread_entry in config.threads:
         thread_name, thread_stack_size = (
@@ -98,9 +94,7 @@ def print_markdown_stack_size_report(
         if thread_name in fn_callee_map:
             fn_node = fn_callee_map[thread_name]
             stats = MissingStats(unresolved_calls={}, missing_stack_sizes=set(), missing_calls=[])
-            worst_stack_size, thread_worst_calltree = deepest_call_tree(
-                fn_node, fn_callee_map, stats
-            )
+            worst_stack_size, thread_worst_calltree = deepest_call_tree(fn_node, fn_callee_map, stats)
             threadInfos[thread_name] = (
                 thread_worst_calltree,
                 worst_stack_size,
@@ -133,9 +127,7 @@ def print_markdown_stack_size_report(
         for c in thread_worst_calltree:
             stack_size = c.node.label.stack_size or 0
             stack_sum += stack_size
-            stackliststr = (
-                stackliststr + f"* {c.title} StackSize: {stack_sum} bytes (Sum: {stack_sum})\n"
-            )
+            stackliststr = stackliststr + f"* {c.title} StackSize: {stack_sum} bytes (Sum: {stack_sum})\n"
         threadWarningHeader = f"Worst Calltree for {thread_name}"
         threadWarningSummary = f"Is {len(thread_worst_calltree)} calls deep, expand for details."
         warningDetails = print_md_collapsible_msg_with_details(
@@ -162,9 +154,7 @@ def print_markdown_stack_size_report(
     print(
         f"\nThere are in {len(fn_callee_map)} functions and {nrCalls} calls at least:\n\n* {totalNrDynamicCalls} dynamic calls in {nrFunctionsWithDynamicCalls} functions left to resolve"
     )
-    print(
-        f"* {nrFunctionsWithoutStackSize} functions without stacksize (ofen from linked libraries)"
-    )
+    print(f"* {nrFunctionsWithoutStackSize} functions without stacksize (ofen from linked libraries)")
     print(f"* {nrFunctionsWithMissingCalls} function calls which could not be found")
     # %d dynamic calls are already resolved.\n"
     print(

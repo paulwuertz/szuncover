@@ -24,9 +24,7 @@ class Test_VCG_Parser(unittest.TestCase):
 
     def test_parse_vcg_label_stack_and_da(self):
         # TODO add tests with dynamic allocation parsing, what can we us it for :?...
-        test_label = (
-            "led_off_dt\\n/zephyr/drivers/led.h:432:19\\n15 bytes (static)\\n0 dynamic objects"
-        )
+        test_label = "led_off_dt\\n/zephyr/drivers/led.h:432:19\\n15 bytes (static)\\n0 dynamic objects"
         ref = VCG_Label(
             file_name="/zephyr/drivers/led.h",
             function_name="led_off_dt",

@@ -62,9 +62,7 @@ class VCG_Parser:
         vcg_label_lines = label_str.split("\\n")
 
         function_name = vcg_label_lines[0] if len(vcg_label_lines) >= 1 else None
-        fp_split = (
-            vcg_label_lines[1].split(":") if len(vcg_label_lines) >= 2 else [None, None, None]
-        )
+        fp_split = vcg_label_lines[1].split(":") if len(vcg_label_lines) >= 2 else [None, None, None]
         line = int(fp_split[-2]) if len(fp_split) >= 3 and fp_split[-2] else None
         column = int(fp_split[-1]) if len(fp_split) >= 3 and fp_split[-1] else None
         file_name = ":".join(fp_split[:-2]) if len(fp_split) >= 3 and fp_split[0] else None

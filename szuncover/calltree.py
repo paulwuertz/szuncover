@@ -60,9 +60,7 @@ def map_vcg_nodes_to_call_entries(vcg_graphs: list[VCG_Graph]) -> dict[str, Func
                 split_dots = fn_name.split(".")
                 fn_name = split_dots[0]
             is_symbol_mapped = fn_name in fn_callee_map
-            is_stack_size_defined = is_symbol_mapped and isinstance(
-                fn_callee_map[fn_name].node.label.stack_size, int
-            )
+            is_stack_size_defined = is_symbol_mapped and isinstance(fn_callee_map[fn_name].node.label.stack_size, int)
             if not is_symbol_mapped:
                 fn_callee_map[fn_name] = FunctionCalleeEntry(
                     title=fn_name,

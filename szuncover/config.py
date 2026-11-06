@@ -14,9 +14,7 @@ class ThreadConfig:
 
     @classmethod
     def from_dict(cls, data: dict) -> "ThreadConfig":
-        return cls(
-            thread_entry_name=data.get("thread_entry_name"), stack_size=data.get("stack_size")
-        )
+        return cls(thread_entry_name=data.get("thread_entry_name"), stack_size=data.get("stack_size"))
 
 
 @dataclass
@@ -39,16 +37,9 @@ class SZuncoverConfig:
         # Handle nested Address if present in the raw data
         raw_threads = data.get("threads")
         raw_dynamic_calls = data.get("dynamic_calls")
-        threads_obj = (
-            [ThreadConfig.from_dict(raw_thread) for raw_thread in raw_threads]
-            if raw_threads
-            else None
-        )
+        threads_obj = [ThreadConfig.from_dict(raw_thread) for raw_thread in raw_threads] if raw_threads else None
         dynamic_calls_obj = (
-            [
-                DynamicCallResolutions.from_dict(raw_dynamic_call)
-                for raw_dynamic_call in raw_dynamic_calls
-            ]
+            [DynamicCallResolutions.from_dict(raw_dynamic_call) for raw_dynamic_call in raw_dynamic_calls]
             if raw_dynamic_calls
             else None
         )
