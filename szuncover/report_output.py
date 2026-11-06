@@ -83,7 +83,7 @@ def print_markdown_stack_size_report(fn_callee_map: dict[str, FunctionCalleeEntr
     logger.info("## Stack check\n\n")
     logger.info("### Stack usage summary\n\n")
     threadInfos = {}
-    logger.info("| Thread name | Max Stack Use | Usage %% | Unresolved calls | Missing stacksizes |")
+    logger.info("| Thread name | Max Stack Use | Usage % | Unresolved calls | Missing stacksizes |")
     logger.info("| ----------- | ----------- | ----------- | ----------- | ----------- |")
     for conf_thread_entry in config.threads:
         thread_name, thread_stack_size = (
@@ -151,16 +151,34 @@ def print_markdown_stack_size_report(fn_callee_map: dict[str, FunctionCalleeEntr
 
     # totalNrResolvedCalls TODO not just count configured but successfully mapped calls
     print("\n**Consider adding or extending a config and add unresolved calls for better results**")
-    print(
-        f"\nThere are in {len(fn_callee_map)} functions and {nrCalls} calls at least:\n\n* {totalNrDynamicCalls} dynamic calls in {nrFunctionsWithDynamicCalls} functions left to resolve"
-    )
-    print(f"* {nrFunctionsWithoutStackSize} functions without stacksize (ofen from linked libraries)")
+    print(f"\nThere are in {len(fn_callee_map)} functions and {nrCalls} calls at least:\n")
+    print(f"* {totalNrDynamicCalls} dynamic calls in {nrFunctionsWithDynamicCalls} functions")
+    print(f"* {nrFunctionsWithoutStackSize} functions without stacksize (often from linked libraries)")
     print(f"* {nrFunctionsWithMissingCalls} function calls which could not be found")
-    # %d dynamic calls are already resolved.\n"
-    print(
-        "\n**Note**: The actual number of dynamic calls might be higher then the number of dynamic branch instructions."
-    )
+    # TODO %d dynamic calls are already resolved.\n"
+    print("\n**Note**: The number of dynamic calls might be higher then the number of dynamic branch instructions.")
     print("      Like in a workqueue a single dynamic branch can execute more then on work tasks.")
+
+    missingWarnSummary = "Expand to see all functions in detail"
+    fnStackMissingWarnBody = "\n* " + "\n* ".join(stats.missing_stack_sizes)
+    fnStackMissingWarning = print_md_collapsible_msg_with_details(
+        "warning", "Missing stacksizes", missingWarnSummary, fnStackMissingWarnBody
+    )
+    logger.info(fnStackMissingWarning)
+
+    missingCallsWarnBody = "\n* " + "\n* ".join(call[0] + " -> " + call[1] for call in stats.missing_calls)
+    missingCallsWarning = print_md_collapsible_msg_with_details(
+        "warning", "Unmatched calls", missingWarnSummary, missingCallsWarnBody
+    )
+    logger.info(missingCallsWarning)
+
+    fnUnresolvedWarnBody = "\n* " + "\n* ".join(
+        f + " has " + str(x) + " dynamic calls" for f, x in stats.unresolved_calls.items()
+    )
+    fnStackMissingWarning = print_md_collapsible_msg_with_details(
+        "warning", "Dynamic calls", missingWarnSummary, fnUnresolvedWarnBody
+    )
+    logger.info(fnStackMissingWarning)
 
     if has_overflows:
         sys.exit(1)

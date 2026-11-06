@@ -119,6 +119,7 @@ def get_missings_fn_stats(
                 stats.unresolved_calls[fn.title] += 1
             else:
                 stats.unresolved_calls[fn.title] = 1
+            continue
         # log missing calls
         fn_target_name_and_path = call_edge.targetname.split(":", 1)
         callee_name = call_edge.targetname
@@ -149,6 +150,7 @@ def deepest_call_tree(
     visited = [f] + (visited or [])
     result: tuple[int, list[FunctionCalleeEntry]] = (0, [])
 
+    get_missings_fn_stats(f, fn_callee_map, stats)
     for call_edge in f.edges:
         if call_edge.targetname == GCC_INDIRECT_CALL_LABEL:
             continue  # TODO handle configured dynamic calls
